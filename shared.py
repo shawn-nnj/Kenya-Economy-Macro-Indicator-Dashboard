@@ -33,7 +33,7 @@ def display_name(name):
     key = str(name).rstrip("; ").strip()
     return DISPLAY.get(key, key)
 
-def section(title, sub, finding=None min_h=0):
+def section(title, sub, finding=None, min_h=0):
     """Section heading, a one-to-two sentence overview, and an optional finding line."""
     st.session_state["_last_section"] = (title, sub, finding)    #used by full-scree pop-up
     st.markdown(f"##### {title}")
