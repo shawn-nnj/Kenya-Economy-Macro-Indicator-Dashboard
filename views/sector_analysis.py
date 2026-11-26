@@ -2,26 +2,26 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from shared import section, sidebar_logo
+from shared import section, display_name
 
 st.markdown("""
 <style>
 .stApp {background-color: #F3F5F8;}
-h1, h2, h3, h5 {color: #00549E !important;}
+h1, h2, h3, h5 {color: #1F4E79 !important;}
 
 [data-testid="stMetric"] {
-    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #0085C3;
+    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #2E86C1;
     border-radius: 10px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(16,24,40,0.08);
     height: 118px; box-sizing: border-box; overflow: hidden;
 }
 [data-testid="stMetricLabel"] {color: #5B6573;}
 [data-testid="stMetricValue"], [data-testid="stMetricValue"] * {
-    font-size: 1.65rem; font-weight: 700; color: #00549E;
+    font-size: 1.65rem; font-weight: 700; color: #1F4E79;
     white-space: nowrap; line-height: 1.25;
 }
 [class*="st-key-card"] {
-    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #0085C3;
+    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #2E86C1;
     border-radius: 10px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(16,24,40,0.08);
 }
@@ -29,7 +29,7 @@ h1, h2, h3, h5 {color: #00549E !important;}
 /* sidebar opener labelled "Filters" */
 [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"], [data-testid*="xpandSidebar"] {
-    background: #00549E !important; border-radius: 8px; padding: 4px 12px;
+    background: #1F4E79 !important; border-radius: 8px; padding: 4px 12px;
     display: flex !important; align-items: center; gap: 6px; width: auto !important;
 }
 [data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapsedControl"] *,
@@ -43,7 +43,7 @@ h1, h2, h3, h5 {color: #00549E !important;}
 </style>
 """, unsafe_allow_html=True)
 
-BLUE, GREY, RED = "#00549E", "#C9CED6", "#C0392B"
+BLUE, GREY, RED = "#1F4E79", "#C9CED6", "#C0392B"
 GDP = "GDP at market prices"
 
 PARENTS = {

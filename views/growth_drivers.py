@@ -9,21 +9,21 @@ from shared import section
 st.markdown("""
 <style>
 .stApp {background-color: #F3F5F8;}
-h1, h2, h3, h5 {color: #00549E !important;}
+h1, h2, h3, h5 {color: #1F4E79 !important;}
 
 [data-testid="stMetric"] {
-    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #0085C3;
+    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #2E86C1;
     border-radius: 10px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(16,24,40,0.08);
     height: 118px; box-sizing: border-box; overflow: hidden;
 }
 [data-testid="stMetricLabel"] {color: #5B6573;}
 [data-testid="stMetricValue"], [data-testid="stMetricValue"] * {
-    font-size: 1.65rem; font-weight: 700; color: #00549E;
+    font-size: 1.65rem; font-weight: 700; color: #1F4E79;
     white-space: nowrap; line-height: 1.25;
 }
 [class*="st-key-card"] {
-    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #0085C3;
+    background: white; border: 1px solid #E1E6EC; border-top: 3px solid #2E86C1;
     border-radius: 10px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(16,24,40,0.08);
 }
@@ -31,7 +31,7 @@ h1, h2, h3, h5 {color: #00549E !important;}
 /* sidebar opener labelled "Menu" */
 [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"], [data-testid*="xpandSidebar"] {
-    background: #00549E !important; border-radius: 8px; padding: 4px 12px;
+    background: #1F4E79 !important; border-radius: 8px; padding: 4px 12px;
     display: flex !important; align-items: center; gap: 6px; width: auto !important;
 }
 [data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapsedControl"] *,
@@ -45,9 +45,9 @@ h1, h2, h3, h5 {color: #00549E !important;}
 </style>
 """, unsafe_allow_html=True)
 
-BLUE, GREY, RED, DARK = "#00549E", "#C9CED6", "#C0392B", "#6B7280"
+BLUE, GREY, RED, DARK = "#1F4E79", "#C9CED6", "#C0392B", "#6B7280"
 YEARS = list(range(2017, 2024))
-CHART_H = 600
+CHART_H = 720
 
 
 # ---------- data ----------
@@ -70,17 +70,12 @@ def clean(name):
     return str(name).rstrip("; ").strip()
 
 
-def kpi_name(name, limit=20):
-    short = re.split(r"[,;]", clean(name))[0].strip()
-    return short if len(short) <= limit else short[:limit - 1].rstrip() + "…"
+def kpi_name(name, limit=None):
+    return display_name(name)               # full name, never cut
 
 
-def axis_name(name, limit=38):
-    n = clean(name)
-    if n.startswith("Financial Intermediation"):
-        n = "Financial intermediation (FISIM)"
-    n = n.split(";")[0].replace(" activities", "")
-    return n if len(n) <= limit else n[:limit - 1].rstrip() + "…"
+def axis_name(name, width=26):
+    return "<br>".join(textwrap.wrap(display_name(name), width))   # wrap long names, don't cut
 
 
 def growth_of(y):
@@ -118,12 +113,12 @@ k2.metric(":material/payments: Nominal GDP", f"KSh {nom_now:.1f} tn",
           f"{(nom_now / nom_prev - 1) * 100:+.1f}% vs {year - 1}" if nom_prev else "First year in series",
           delta_color="normal" if nom_prev else "off",
           help="Size of the economy at current prices, in KSh trillion.")
-k3.metric(":material/emoji_events: Leading Contributor", kpi_name(lead_name),
+k3.metric(":material/emoji_events: Leading contributor", kpi_name(lead_name),
           f"{lead_val:+.2f} pp of growth", delta_color="off",
           help=f"{clean(lead_name)} added {lead_val:.2f} percentage points to the "
                f"{g:.1f}% real GDP growth in {year}.")
 if worst_val < 0:
-    k4.metric(":material/trending_down: Largest Detractor", kpi_name(worst_name),
+    k4.metric(":material/trending_down: Largest detractor", kpi_name(worst_name),
               f"{worst_val:+.2f} pp of growth",
               help=f"{clean(worst_name)} took {abs(worst_val):.2f} percentage points "
                    f"off real GDP growth in {year}.")
