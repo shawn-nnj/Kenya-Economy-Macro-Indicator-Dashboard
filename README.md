@@ -1,9 +1,9 @@
-# Kenya Economy Dashboard
+# Kenya Economy Macro Indicator Dashboard
 
 An interactive Streamlit dashboard showing what drives Kenya's GDP growth and how each
 sector contributes, built with Python, pandas and Plotly.
 
-**Live app:** https://YOUR-APP-NAME.streamlit.app
+**Live app:** https://kenya-economy-macro-indicator-dashboard.streamlit.app
 
 ## What it shows
 - **Growth drivers:** contribution of each sector to real GDP growth, 2017 to 2023
