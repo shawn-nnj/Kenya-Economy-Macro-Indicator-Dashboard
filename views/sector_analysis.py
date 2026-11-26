@@ -13,7 +13,7 @@ h1, h2, h3, h5 {color: #1F4E79 !important;}
     background: white; border: 1px solid #E1E6EC; border-top: 3px solid #2E86C1;
     border-radius: 10px; padding: 14px 18px;
     box-shadow: 0 1px 3px rgba(16,24,40,0.08);
-    height: 118px; box-sizing: border-box; overflow: hidden;
+    box-sizing: border-box; overflow: hidden;
 }
 [data-testid="stMetricLabel"] {color: #5B6573;}
 [data-testid="stMetricValue"], [data-testid="stMetricValue"] * {
@@ -75,7 +75,7 @@ SECTORS = ["Agriculture, forestry and fishing", "Mining and quarrying",
 
 
 def short(n):
-    return n.split(",")[0].split(";")[0].replace(" activities", "")
+    return display_name(n)
 
 
 @st.cache_data
@@ -98,8 +98,7 @@ RANKED_SECTORS = list(by_size.index)
 SIZE_RANK = {s: i + 1 for i, s in enumerate(RANKED_SECTORS)}
 
 # ---------- filters ----------
-sidebar_logo()
-st.sidebar.header("Sector Analysis")
+st.sidebar.header("Filters")
 st.sidebar.markdown("**Sector**")
 st.sidebar.caption(f"Ranked by share of GDP in {LATEST}, largest first.")
 sector = st.sidebar.selectbox("Sector", RANKED_SECTORS, label_visibility="collapsed",
@@ -126,13 +125,13 @@ rank = list(ranked.index).index(sector) + 1
 
 # ---------- header and KPI cards ----------
 st.title(f":material/pie_chart: Sector Analysis: {short(sector)}")
-st.caption(f"Size of the sector, how fast it is growing and how much of the economy's "
+st.caption(f"How big the sector is, how fast it is growing and how much of the economy's "
            f"growth it delivered, {y0} to {y1}. Use the filters on the left to change "
            f"sector, prices or period.")
 
 st.subheader("Key Performance Indicators")
-st.caption(f"Growth figures use real GDP at constant 2016 prices; share of GDP uses "
-           f"current prices.")
+st.caption("Growth figures use real GDP at constant 2016 prices; share of GDP uses "
+           "current prices.")
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric(":material/donut_large: Share of GDP", f"{share1:.1f}%",
@@ -147,7 +146,7 @@ c3.metric(":material/add_chart: Contribution to Growth", f"{contrib_pp:.1f} pp",
 c4.metric(":material/leaderboard: Rank by Contribution", f"#{rank} of {len(SECTORS)}",
           f"Top: {short(ranked.index[0])}", delta_color="off",
           help=f"Ranked by contribution to real GDP growth, {y0} to {y1}. "
-               f"The top contributor is {ranked.index[0]}.")
+               f"The top contributor is {short(ranked.index[0])}.")
 
 st.write("")
 
@@ -172,15 +171,18 @@ sg = [float((real.loc[sector, y] / real.loc[sector, y - 1] - 1) * 100) for y in 
 eg = [float((gdp_r[y] / gdp_r[y - 1] - 1) * 100) for y in gy]
 ahead = sum(a > b for a, b in zip(sg, eg))
 find2 = f"{short(sector)} grew faster than the economy in {ahead} of {len(gy)} years."
-# label above the point when the sector is above the economy, below when it is below
-pos = ["top center" if s >= e else "bottom center" for s, e in zip(sg, eg)]
+cats = [str(y) for y in gy]
 fig2 = go.Figure()
-fig2.add_trace(go.Scatter(x=[str(y) for y in gy], y=eg, name="Economy (GDP)",
+fig2.add_trace(go.Scatter(x=cats, y=eg, name="Economy (GDP)",
                           mode="lines+markers", line=dict(color="#9AA3AF", dash="dash")))
-fig2.add_trace(go.Scatter(x=[str(y) for y in gy], y=sg, name=short(sector),
-                          mode="lines+markers+text", line=dict(color=BLUE, width=3),
-                          text=[f"{v:.1f}%" for v in sg], textposition=pos,
-                          textfont=dict(size=12, color=BLUE), cliponaxis=False))
+fig2.add_trace(go.Scatter(x=cats, y=sg, name=short(sector),
+                          mode="lines+markers", line=dict(color=BLUE, width=3)))
+# labels in white boxes: above the point when the sector is above the economy, below otherwise
+for i, (s_, e_) in enumerate(zip(sg, eg)):
+    fig2.add_annotation(x=i, y=s_, text=f"{s_:.1f}%", showarrow=False,
+                        yshift=20 if s_ >= e_ else -20,
+                        bgcolor="rgba(255,255,255,0.92)", borderpad=2,
+                        font=dict(size=12, color=BLUE))
 lo, hi = min(min(sg), min(eg)), max(max(sg), max(eg))
 fig2.update_layout(font=dict(color="#222"), paper_bgcolor="white", plot_bgcolor="white",
                    height=380, margin=dict(l=80, r=20, t=30, b=40),
@@ -194,14 +196,15 @@ fig2.update_yaxes(title_text="Real growth, % per year")
 
 left, right = st.columns(2)
 with left.container(key="card_size"):
-    section(":material/bar_chart: Sector output over time",
+    section(":material/bar_chart: Sector Output Over Time",
             f"Value of everything the sector produced each year, in KSh billion "
             f"({'constant 2016 prices' if real_basis else 'current prices'}).",
             find1, min_h=110)
     st.plotly_chart(fig1, theme=None)
 with right.container(key="card_growth"):
     section(":material/show_chart: Growth Against the Economy",
-            "Annual real growth of the sector (blue) compared with the whole economy (grey dashed).",
+            "Annual real growth of the sector (blue) compared with the whole economy "
+            "(grey dashed).",
             find2, min_h=110)
     st.plotly_chart(fig2, theme=None)
 
@@ -209,7 +212,7 @@ with right.container(key="card_growth"):
 kids = PARENTS.get(sector, [])
 with st.container(key="card_sub"):
     if not kids:
-        section(":material/account_tree: Within the Sector",
+        section(":material/account_tree: Inside the Sector",
                 "Which parts of the sector drove its growth.",
                 f"{short(sector)} is reported as a single line, so there is no breakdown.")
         st.info("This sector is reported as a single line, so there is nothing to drill into.")
@@ -236,11 +239,13 @@ with st.container(key="card_sub"):
                                       showgrid=False, color="#222",
                                       range=[min(0, pp.min()) - 2, pp.max() * 1.2 + 2]),
                            yaxis=dict(showgrid=False, color="#222", automargin=True))
-        section(":material/account_tree: Within the Sector",
+        section(":material/account_tree: Inside the Sector",
                 f"Which parts of {short(sector)} drove its growth between {y0} and {y1}. "
-                f"Blue marks the largest contributor and red any detractors.",
+                f"Blue marks the biggest contributor and red any drag.",
                 find3)
         st.plotly_chart(fig3, theme=None)
 
 st.caption("Contribution to growth = change in real output ÷ starting-year output, "
            "in percentage points (pp). Sub-sector bars sum to the sector's total growth.")
+st.caption("Source: Kenya National Bureau of Statistics (KNBS), GDP by activity; "
+           "author's calculations. 2022 and 2023 figures are provisional and may be revised.")
